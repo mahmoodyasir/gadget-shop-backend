@@ -1,0 +1,12 @@
+import express from 'express';
+import validateRequest from '../../middlewares/validateRequests';
+import { ProductControllers } from './product.controller';
+
+const router = express.Router();
+
+router.post('/',
+    ProductControllers.createProduct);
+
+
+
+export const ProductRoutes = router;
