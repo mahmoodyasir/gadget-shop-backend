@@ -2,6 +2,8 @@ import express from 'express';
 import validateRequest from '../../middlewares/validateRequests';
 import { UserValidation } from './user.validation';
 import { UserControllers } from './user.controller';
+import upload from '../../middlewares/upload';
+import userAuth from '../../middlewares/userAuth';
 
 
 const router = express.Router();
@@ -19,6 +21,11 @@ router.get('/get_user', UserControllers.getUserByToken);
 router.post('/login',
     validateRequest(UserValidation.loginDataValidationSchema),
     UserControllers.userLogin);
+
+router.put('/update_user',
+    userAuth(),
+    upload.single('image'),
+    UserControllers.updateUser);
 
 
 

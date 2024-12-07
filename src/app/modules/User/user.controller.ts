@@ -2,6 +2,7 @@ import catchAsync from "../../utils/catchAsync";
 import httpStatus from "http-status";
 import sendResponse from "../../utils/sendResponse";
 import { UserServices } from "./user.service";
+import { uploadImageToS3 } from "../../utils/uploadImageToS3";
 
 
 const userRegister = catchAsync(async (req, res) => {
@@ -64,6 +65,43 @@ const userLogin = catchAsync(async (req, res) => {
 });
 
 
+const updateUser = catchAsync(async (req, res) => {
+
+    const { email } = req.user;
+
+    const data = req.body;
+
+    const imageFile = req.file;
+
+    let image_url = "";
+
+    let updatableData = {}
+
+    if (imageFile) {
+        image_url = await uploadImageToS3(imageFile as Express.Multer.File);
+
+        updatableData = {
+            ...data,
+            image_url: image_url
+        }
+    }
+
+    else {
+        updatableData = {
+            ...data,
+        }
+    }
+
+    const result = await UserServices.updateUserToDB(email, updatableData);
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "User Updated Successfully",
+        data: result
+    });
+
+})
 
 
 export const UserControllers = {
@@ -71,4 +109,5 @@ export const UserControllers = {
     getUserByToken,
     refreshToken,
     userLogin,
+    updateUser,
 }

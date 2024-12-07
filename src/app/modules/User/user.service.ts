@@ -183,10 +183,27 @@ const loginUser = async (payload: TLogin) => {
 };
 
 
+const updateUserToDB = async (email: string, updatableData: Partial<IUser>) => {
+
+    const updatedUser = await User.findOneAndUpdate(
+        { email },
+        { $set: updatableData },
+        { new: true, runValidators: true }
+    );
+
+    const userObject = (updatedUser as any).toObject();
+
+    const { password, ...remainingData } = userObject;
+
+    return remainingData;
+
+}
+
 
 export const UserServices = {
     createUserIntoDB,
     getUserFromDbByToken,
     getTokenByrefreshToken,
     loginUser,
+    updateUserToDB,
 }
