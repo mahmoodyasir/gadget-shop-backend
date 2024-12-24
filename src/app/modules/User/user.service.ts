@@ -13,6 +13,7 @@ const createUserIntoDB = async (payload: Partial<IUser>) => {
     const userObject: IUser = newUser.toObject();
 
     const jwtPayload = {
+        id: newUser.id,
         email: newUser.email,
         username: newUser.username || "",
         is_staff: newUser.is_staff || false,
@@ -52,13 +53,14 @@ const getUserFromDbByToken = async (token: string) => {
 
     const { email } = decoded;
 
-    const user = await User.isUserExistsByEmail(email);
+    const user: any = await User.isUserExistsByEmail(email);
 
     if (!user) {
         throw new AppError(httpStatus.NOT_FOUND, 'User Not Found !');
     };
 
     const jwtPayload = {
+        id: user.id,
         email: user.email,
         username: user.username || "",
         is_staff: user.is_staff || false,
@@ -103,13 +105,14 @@ const getTokenByrefreshToken = async (refresh_token: string) => {
 
     const { email } = decoded;
 
-    const user = await User.isUserExistsByEmail(email);
+    const user: any = await User.isUserExistsByEmail(email);
 
     if (!user) {
         throw new AppError(httpStatus.NOT_FOUND, 'User Not Found !');
     };
 
     const jwtPayload = {
+        id: user.id,
         email: user.email,
         username: user.username || "",
         is_staff: user.is_staff || false,
@@ -141,7 +144,7 @@ const getTokenByrefreshToken = async (refresh_token: string) => {
 
 const loginUser = async (payload: TLogin) => {
 
-    const user = await User.isUserExistsByEmail(payload.email);
+    const user: any = await User.isUserExistsByEmail(payload.email);
 
     if (!user) {
         throw new AppError(httpStatus.NOT_FOUND, 'User Not Found !');
@@ -151,6 +154,7 @@ const loginUser = async (payload: TLogin) => {
         throw new AppError(httpStatus.FORBIDDEN, 'Password do not match');
 
     const jwtPayload = {
+        id: user.id,
         email: user.email,
         username: user.username || "",
         is_staff: user.is_staff || false,

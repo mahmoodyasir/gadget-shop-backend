@@ -40,7 +40,7 @@ const createProduct = catchAsync(async (req, res) => {
     const result = await ProductServices.insertProductIntoDB(productPayload);
 
     sendResponse(res, {
-        statusCode: httpStatus.OK,
+        statusCode: httpStatus.CREATED,
         success: true,
         message: "Product Created Successfully",
         data: result
@@ -53,7 +53,7 @@ const createRawProduct = catchAsync(async (req, res) => {
     const result = await ProductServices.insertProductIntoDB(req.body)
 
     sendResponse(res, {
-        statusCode: httpStatus.OK,
+        statusCode: httpStatus.CREATED,
         success: true,
         message: "Product Created Successfully",
         data: result

@@ -9,7 +9,7 @@ const userRegister = catchAsync(async (req, res) => {
 
     const result = await UserServices.createUserIntoDB(req.body);
 
-    res.status(httpStatus.OK).json({
+    res.status(httpStatus.CREATED).json({
         tokens: {
             refresh: result.refreshToken,
             access: result.accessToken
