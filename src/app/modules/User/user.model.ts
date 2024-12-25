@@ -1,6 +1,6 @@
 import { model, Schema } from "mongoose";
 import { v4 as uuidv4 } from "uuid";
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import config from "../../config";
 import { IUser, UserModel } from "./user.interface";
 
