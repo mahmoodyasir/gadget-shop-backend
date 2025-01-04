@@ -3,6 +3,9 @@ import httpStatus from "http-status";
 import sendResponse from "../../utils/sendResponse";
 import { UserServices } from "./user.service";
 import { uploadImageToS3 } from "../../utils/uploadImageToS3";
+import path from "path";
+import imageUploadQueue from "../../queues/imageUploadQueue";
+import config from "../../config";
 
 
 const userRegister = catchAsync(async (req, res) => {
@@ -78,7 +81,33 @@ const updateUser = catchAsync(async (req, res) => {
     let updatableData = {}
 
     if (imageFile) {
-        image_url = await uploadImageToS3(imageFile as Express.Multer.File);
+
+        const deleteImageUrl = data?.image_url;
+
+        const file = imageFile as Express.Multer.File;
+        const { originalname } = file;
+        const fileExtension = path.extname(originalname);
+        const uniqueFilename = `${Date.now()}-${Math.round(Math.random() * 1E9)}${fileExtension}`;
+
+        const fileBufferBase64 = file.buffer.toString('base64');
+        const folderName = "user";
+
+        if (deleteImageUrl && deleteImageUrl !== "") {
+            await imageUploadQueue.add('deleteImage', { imageUrl: deleteImageUrl });
+        }
+
+        await imageUploadQueue.add('uploadImage', {
+            file: {
+                originalname: file.originalname,
+                mimetype: file.mimetype,
+                buffer: fileBufferBase64,
+            },
+            fileName: uniqueFilename,
+            folderName: folderName,
+        });
+
+        image_url = `https://${config.aws_s3_bucket_name}.s3.amazonaws.com/${folderName}/${uniqueFilename}`;
+
 
         updatableData = {
             ...data,

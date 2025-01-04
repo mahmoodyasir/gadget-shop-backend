@@ -8,6 +8,9 @@ const router = express.Router();
 router.post('/', upload.array('images'),
     ProductControllers.createProduct);
 
+router.put('/:productId', upload.array('images'),
+    ProductControllers.updateProduct);
+
 router.post('/update_image/:productId', upload.array('images'),
     ProductControllers.updateProductImages);
 

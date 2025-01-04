@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import { Types, Document } from "mongoose";
 import { IInventory } from "../Inventory/inventory.interface";
 
 export interface ICategory {
@@ -17,7 +17,7 @@ export interface ISpecification {
     value: string[];
 }
 
-export interface IProduct {
+export interface IProduct extends Document {
     name: string;
     price: number;
     discount_price?: number | null;

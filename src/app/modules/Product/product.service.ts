@@ -45,6 +45,50 @@ const insertProductIntoDB = async (payload: Partial<IProduct>) => {
 };
 
 
+const updateProductToDB = async (productId: string, updatableData: Partial<IProduct>) => {
+
+    const { category, inventory_product, ...restProductData } = updatableData;
+
+    let existingCategory = await Category.findOne({ name: category });
+
+    if (!existingCategory) {
+        existingCategory = new Category({ name: category });
+        existingCategory.save();
+    }
+
+    if (inventory_product) {
+
+        await Inventory.findOneAndUpdate(
+            { product: productId },
+            { $set: inventory_product },
+            { new: true, runValidators: true }
+        );
+    }
+
+    const finalResult = await Product.findByIdAndUpdate(
+        productId,
+        {
+            $set: {
+                ...restProductData,
+                category: existingCategory
+            }
+        },
+        { new: true, runValidators: true }
+    ).populate([
+        {
+            path: 'category',
+            select: "name",
+        },
+        {
+            path: 'inventory_product',
+        }
+    ]);
+
+    return finalResult;
+
+}
+
+
 const getAllProductFromDB = async () => {
 
     const allProducts = await Product.find().populate([
@@ -263,6 +307,7 @@ const getKeyFeatureFromDB = async () => {
 
 export const ProductServices = {
     insertProductIntoDB,
+    updateProductToDB,
     getAllProductFromDB,
     getSingleProductFromDB,
     updateProductImagesToDB,
