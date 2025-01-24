@@ -134,8 +134,7 @@ const updateProduct = catchAsync(async (req, res) => {
         image_urls: url_modified === true ? imageUrls : existingImages,
     };
 
-    console.log(productPayload);
-    
+
     const result = await ProductServices.updateProductToDB(productId, productPayload);
 
     sendResponse(res, {

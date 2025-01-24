@@ -53,7 +53,7 @@ const updateProductToDB = async (productId: string, updatableData: Partial<IProd
 
     if (!existingCategory) {
         existingCategory = new Category({ name: category });
-        existingCategory.save();
+        await existingCategory.save();
     }
 
     if (inventory_product) {
@@ -114,8 +114,9 @@ const getSingleProductFromDB = async (productId: string) => {
         },
         {
             path: 'inventory_product',
+            select: "",
         }
-    ]);
+    ]).exec();
 
     return product;
 };

@@ -17,7 +17,7 @@ export interface ISpecification {
     value: string[];
 }
 
-export interface IProduct extends Document {
+export interface IProduct {
     name: string;
     price: number;
     discount_price?: number | null;
