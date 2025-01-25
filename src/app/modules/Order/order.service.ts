@@ -67,6 +67,29 @@ const createOrderIntoDB = async (id: string, orderData: TOrderCreation) => {
 }
 
 
+const getAllOrderFromDB = async () => {
+
+    const result = await Order.find().sort({ createdAt: -1 }).populate([
+        { path: "user", select: "-password" },
+        { path: "items.product", select: "" },
+    ]);
+
+    return result;
+}
+
+const getAllOrderByUserFromDB = async (id: string) => {
+    
+    const result = await Order.find({user: id}).sort({ createdAt: -1 }).populate([
+        { path: "user", select: "-password" },
+        { path: "items.product", select: "" },
+    ]);
+
+    return result;
+}
+
+
 export const OrderServices = {
     createOrderIntoDB,
+    getAllOrderFromDB,
+    getAllOrderByUserFromDB,
 }
