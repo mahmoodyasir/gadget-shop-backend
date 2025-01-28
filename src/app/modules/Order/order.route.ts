@@ -22,6 +22,9 @@ router.get('/get_all_order', adminAuth({
     is_superuser: false
 }), OrderControllers.getAllOrder);
 
+router.post('/process',
+    OrderControllers.receiveSSLCommerzResponse);
+
 
 
 

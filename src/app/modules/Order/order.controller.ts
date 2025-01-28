@@ -2,6 +2,7 @@ import httpStatus from "http-status";
 import catchAsync from "../../utils/catchAsync";
 import { OrderServices } from "./order.service";
 import sendResponse from "../../utils/sendResponse";
+import config from "../../config";
 
 
 const createOrder = catchAsync(async (req, res) => {
@@ -10,7 +11,9 @@ const createOrder = catchAsync(async (req, res) => {
 
     const orderData = req.body;
 
-    const result: any = await OrderServices.createOrderIntoDB(id, orderData);
+    const host = req.get('host');
+
+    const result: any = await OrderServices.createOrderIntoDB(id, orderData, host);
 
     sendResponse(res, {
         statusCode: httpStatus.CREATED,
@@ -53,7 +56,28 @@ const getAllOrderByUser = catchAsync(async (req, res) => {
 });
 
 
+const receiveSSLCommerzResponse = catchAsync(async (req, res) => {
 
+    const data = req.body;
+
+    if (data?.status === "VALID") {
+
+        res.redirect(`${config.frontend_url}/payment/success`);
+    }
+
+    else {
+        res.redirect(`${config.frontend_url}/payment/failed`);
+    }
+
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Received response from sslcommerz",
+        data: req.body
+    });
+
+});
 
 
 
@@ -61,4 +85,5 @@ export const OrderControllers = {
     createOrder,
     getAllOrder,
     getAllOrderByUser,
+    receiveSSLCommerzResponse,
 }

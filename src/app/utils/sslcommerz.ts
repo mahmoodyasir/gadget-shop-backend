@@ -69,11 +69,12 @@ class SSLCSession extends SSLCommerz {
         name: string,
         email: string,
         address1: string,
+        address2 = "",
         city: string,
         postcode: string,
         country: string,
         phone: string,
-        address2 = ""
+
     ): void {
         this.integrationData.cus_name = name;
         this.integrationData.cus_email = email;
@@ -108,7 +109,16 @@ class SSLCSession extends SSLCommerz {
 
     async initPayment(): Promise<any> {
         try {
-            const response = await axios.post(this.sslcSessionApi, this.integrationData);
+    
+            const encodedData = new URLSearchParams(this.integrationData).toString();
+
+            const response = await axios.post(this.sslcSessionApi, encodedData, {
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+            });
+
+      
             if (response.data.status === "FAILED") {
                 return {
                     status: response.data.status,
