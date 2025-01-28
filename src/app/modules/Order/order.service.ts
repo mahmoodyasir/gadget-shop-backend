@@ -20,7 +20,7 @@ const createOrderIntoDB = async (id: string, orderData: TOrderCreation) => {
                 }
             ]);
 
-            console.log(product)
+            // console.log(product);
 
             if (!product) {
                 throw new Error(`Product with ID ${productId} not found`);
