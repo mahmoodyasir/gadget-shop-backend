@@ -5,11 +5,12 @@ import { Order } from "./order.model";
 import { Inventory } from "../Inventory/inventory.model";
 import { v4 as uuidv4 } from "uuid";
 import redis_client from "../../utils/redisClient";
-import { SSLCSession } from "../../utils/sslcommerz";
+import { SSLCSession, Validation } from "../../utils/sslcommerz";
 import config from "../../config";
 import { User } from "../User/user.model";
 import AppError from "../../errors/AppError";
 import httpStatus from "http-status";
+import { Response } from "express";
 
 const handleSSLComerz = async (data: { user_id: string, order_data: TOrderCreation, host: any }, redis_key: string) => {
 
@@ -49,13 +50,13 @@ const handleSSLComerz = async (data: { user_id: string, order_data: TOrderCreati
         throw new AppError(httpStatus.NOT_FOUND, 'User Not Found !');
     }
 
-    const mypayment = new SSLCSession(true, config.store_id, config.store_pass);
+    const mypayment = new SSLCSession(Boolean(config.is_sandbox), config.store_id, config.store_pass);
 
-    const status_url = `https://${data.host}/orders/process`;
+    const status_url = `${Boolean(config.production) === true ? 'http' : 'https'}://${data.host}/api/orders/process`;
 
     mypayment.setUrls(status_url, status_url, status_url, status_url);
 
-    mypayment.setProductIntegration(total, 'BDT', 'User Product', 'None', num_of_item, 'Physical Address', 'None' );
+    mypayment.setProductIntegration(total, 'BDT', 'User Product', 'None', num_of_item, 'Physical Address', 'None');
 
     mypayment.setCustomerInfo(`${user?.first_name} ${user?.last_name}`, user?.email, user?.address || "", "", "", "", "Bangladesh", user?.phone_number || "");
 
@@ -70,7 +71,92 @@ const handleSSLComerz = async (data: { user_id: string, order_data: TOrderCreati
 }
 
 
-const receiveResponseFromSSLCommerz = async () => {
+const receiveResponseFromSSLCommerz = async (res: Response, data: any) => {
+
+    if (data?.status === "VALID") {
+
+        const orderItems = [];
+        let total = 0;
+
+        const orderData = await redis_client.get(String(data?.value_a));
+
+        const parsedOrderData = JSON.parse(String(orderData));
+
+        const products: Record<string, number> = parsedOrderData?.order_data?.products;
+
+        const id: string = parsedOrderData?.user_id;
+
+        const shipping_address = parsedOrderData?.order_data?.shipping_address;
+
+        for (const [productId, quantity] of Object.entries(products)) {
+
+            const product = await Product.findById(productId).populate([
+                {
+                    path: "inventory_product"
+                }
+            ]);
+
+            // console.log(product);
+
+            if (!product) {
+                throw new Error(`Product with ID ${productId} not found`);
+            };
+
+            const price = product.discount_price && product.discount_price > 0 ? product.discount_price : product.price;
+            const subTotal = price * quantity;
+            total += subTotal;
+
+            if (product.inventory_product && product.inventory_product.quantity < quantity) {
+                throw new Error(`Not enough stock for product ${product.name}. Available: ${product.inventory_product.quantity}`);
+            }
+
+            if (product.inventory_product) {
+                await Inventory.findByIdAndUpdate(product.inventory_product._id, {
+                    $inc: { quantity: -quantity },
+                });
+            }
+
+            await product.save();
+
+            orderItems.push({
+                product: new Types.ObjectId(productId),
+                quantity,
+                sub_total: subTotal,
+            });
+        }
+
+        const order = new Order({
+            user: new Types.ObjectId(id),
+            shipping_address,
+            payment_complete: true,
+            payment_type: "online",
+            total,
+            status: "processing",
+            items: orderItems,
+            online_payment: {
+                transaction_id: data?.tran_id,
+                card_brand: data?.card_brand,
+                card_issuer: data?.card_issuer,
+                total_paid: data?.amount,
+                currency: data?.currency,
+                val_id: data?.val_id,
+            }
+        });
+
+        await order.save();
+
+        res.redirect(`${config.frontend_url}/payment/${data?.val_id}`);
+    }
+
+}
+
+const orderValidationFromSSLCOMMERZ = async (validationId: string) => {
+
+    const myValidation = new Validation(Boolean(config.is_sandbox), config.store_id, config.store_pass);
+
+    const response = myValidation.validateTransaction(validationId);
+
+    return response;
 
 }
 
@@ -181,4 +267,5 @@ export const OrderServices = {
     getAllOrderFromDB,
     getAllOrderByUserFromDB,
     receiveResponseFromSSLCommerz,
+    orderValidationFromSSLCOMMERZ,
 }

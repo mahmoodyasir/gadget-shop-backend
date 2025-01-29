@@ -25,6 +25,8 @@ router.get('/get_all_order', adminAuth({
 router.post('/process',
     OrderControllers.receiveSSLCommerzResponse);
 
+router.post('/validation', OrderControllers.orderValidation);
+
 
 
 

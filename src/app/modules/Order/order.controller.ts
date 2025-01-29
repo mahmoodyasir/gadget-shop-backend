@@ -60,24 +60,24 @@ const receiveSSLCommerzResponse = catchAsync(async (req, res) => {
 
     const data = req.body;
 
-    if (data?.status === "VALID") {
+    await OrderServices.receiveResponseFromSSLCommerz(res, data);
 
-        res.redirect(`${config.frontend_url}/payment/success`);
-    }
+});
 
-    else {
-        res.redirect(`${config.frontend_url}/payment/failed`);
-    }
 
+const orderValidation = catchAsync(async (req, res) => {
+
+    const { val_id } = req.body;
+
+    const result = await OrderServices.orderValidationFromSSLCOMMERZ(val_id);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
-        message: "Received response from sslcommerz",
-        data: req.body
+        message: "Order Validation Result",
+        data: result
     });
-
-});
+})
 
 
 
@@ -86,4 +86,5 @@ export const OrderControllers = {
     getAllOrder,
     getAllOrderByUser,
     receiveSSLCommerzResponse,
+    orderValidation,
 }

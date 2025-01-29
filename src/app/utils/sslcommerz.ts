@@ -154,7 +154,7 @@ class Validation extends SSLCommerz {
 
         try {
             const response = await axios.get(this.sslcValidationApi, { params: queryParams });
-            if (response.data.status === "VALIDATED") {
+            if (response.data.status === "VALIDATED" || response.data.status === "VALID") {
                 return {
                     status: "VALIDATED",
                     data: response.data,

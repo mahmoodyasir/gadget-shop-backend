@@ -12,6 +12,7 @@ export interface IOnlinePayment {
     card_issuer?: string;
     total_paid?: number;
     currency?: string;
+    val_id?:string;
 };
 
 export interface IOrder {

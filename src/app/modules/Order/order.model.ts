@@ -23,6 +23,7 @@ const OnlinePaymentSchema = new Schema<IOnlinePayment>({
     card_issuer: { type: String },
     total_paid: { type: Number },
     currency: { type: String },
+    val_id: { type: String },
 });
 
 const OrderSchema = new Schema<IOrder>(
