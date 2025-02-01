@@ -147,6 +147,9 @@ const receiveResponseFromSSLCommerz = async (res: Response, data: any) => {
 
         res.redirect(`${config.frontend_url}/payment/${data?.val_id}`);
     }
+    else{
+        res.redirect(`${config.frontend_url}/payment/failed`);
+    }
 
 }
 

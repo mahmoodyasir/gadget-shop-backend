@@ -72,8 +72,8 @@ const orderValidation = catchAsync(async (req, res) => {
     const result = await OrderServices.orderValidationFromSSLCOMMERZ(val_id);
 
     sendResponse(res, {
-        statusCode: httpStatus.OK,
-        success: true,
+        statusCode: result?.status === "VALIDATED" ? httpStatus.OK : httpStatus.INTERNAL_SERVER_ERROR,
+        success: result?.status === "VALIDATED" ? true : false,
         message: "Order Validation Result",
         data: result
     });

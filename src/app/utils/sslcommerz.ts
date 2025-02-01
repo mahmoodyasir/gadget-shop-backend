@@ -161,7 +161,7 @@ class Validation extends SSLCommerz {
                 };
             } else {
                 return {
-                    status: response.data.status,
+                    status: "FAILED",
                     data: response.data,
                 };
             }
