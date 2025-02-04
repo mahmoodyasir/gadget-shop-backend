@@ -52,7 +52,7 @@ const handleSSLComerz = async (data: { user_id: string, order_data: TOrderCreati
 
     const mypayment = new SSLCSession(Boolean(config.is_sandbox), config.store_id, config.store_pass);
 
-    const status_url = `${Boolean(config.production) === true ? 'http' : 'https'}://${data.host}/api/orders/process`;
+    const status_url = `${config.backend_url}/api/orders/process`;
 
     mypayment.setUrls(status_url, status_url, status_url, status_url);
 
